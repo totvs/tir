@@ -130,6 +130,9 @@ class ConfigLoader:
             self.server_mock  = str(data["ServerMock"]) if "ServerMock" in data else ""
             self.sso_login = ("SSOLogin" in data and bool(data["SSOLogin"]))
             self.ignore_certificate_errors = ("IgnoreCertificateErrors" in data and bool(data["IgnoreCertificateErrors"]))
+            self.new_home = ("NewHome" in data and bool(data["NewHome"]))
+            self._flag_is_new_browse = None
+            self.routine_module = ""
 
 
     def check_keys(self, json_data):
@@ -201,6 +204,7 @@ class ConfigLoader:
         "ServerMock",
         "SSOLogin",
         "IgnoreCertificateErrors"
+        "NewHome"
     ]
         keys_json = set(json_data.keys())
         wrong_keys = keys_json - set(valid_keys)

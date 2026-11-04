@@ -21,12 +21,16 @@ from tir.technologies.core.log import Log
 from tir.technologies.core.config import ConfigLoader
 from tir.technologies.core.language import LanguagePack
 from tir.technologies.core.third_party.xpath_soup import xpath_soup
+from tir.technologies.core.utils import Utils
 from selenium.webdriver.firefox.options import Options as FirefoxOpt
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOpt
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 from tir.technologies.core.logging_config import logger
 from tir.version import __version__
@@ -59,9 +63,29 @@ class Base(unittest.TestCase):
     >>> def APWInternal(Base):
     """
 
-    driver = None
-    wait = None
+    _shared_driver = None
+    _shared_wait = None
     errors = []
+    
+    @property
+    def driver(self):
+        """Property to always get the current shared driver instance"""
+        return Base._shared_driver
+    
+    @driver.setter
+    def driver(self, value):
+        """Property to update the shared driver for all instances"""
+        Base._shared_driver = value
+    
+    @property
+    def wait(self):
+        """Property to always get the current shared wait instance"""
+        return Base._shared_wait
+    
+    @wait.setter
+    def wait(self, value):
+        """Property to update the shared wait for all instances"""
+        Base._shared_wait = value
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -96,6 +120,7 @@ class Base(unittest.TestCase):
         self.language = LanguagePack(self.config.language) if self.config.language else ""
         self.log = Log(folder=self.config.log_folder, config_path=self.config_path)
         self.log.station = socket.gethostname()
+        self.utils = Utils()
         self.test_case = []
         self.last_test_case = None
         self.message = ""
@@ -116,6 +141,7 @@ class Base(unittest.TestCase):
         self.config.log_file = False
         self.tmenu_out_iframe = False
         self.twebview_context = False
+        self.filter_blocked_containers = True
 
         if autostart:
             self.Start()
@@ -206,10 +232,13 @@ class Base(unittest.TestCase):
             return True
 
         except StaleElementReferenceException:
-            logger().exception("********Element Stale click*********")
+            logger().debug("********Element Stale click*********")
+            return False
+        except ElementClickInterceptedException as e:
+            logger().debug(e.msg)
             return False
         except Exception as e:
-            logger().exception(f"Warning click method Exception: {str(e)}")
+            logger().debug(f"Warning click method Exception: {str(e)}")
             return False
 
     def compare_field_values(self, field, user_value, captured_value, message):
@@ -277,7 +306,6 @@ class Base(unittest.TestCase):
 
         except Exception as e:
             try:
-                logger().warning(f"Warning double_click method Exception: {str(e)}")
                 self.scroll_to_element(element)
                 actions = ActionChains(self.driver)
                 actions.move_to_element(element)
@@ -563,7 +591,14 @@ class Base(unittest.TestCase):
                 tries += 1
 
             if filtered_iframe:
-                self.driver.switch_to.frame(self.find_shadow_element('iframe', filtered_iframe)[0]) if self.webapp_shadowroot() else self.driver.switch_to.frame(filtered_iframe)
+                if self.webapp_shadowroot():
+                    shadow_iframe = self.find_shadow_element('iframe', filtered_iframe)
+                    if shadow_iframe:
+                        self.driver.switch_to.frame(shadow_iframe[0])
+                    else:
+                        self.driver.switch_to.frame(filtered_iframe)
+                else:
+                    self.driver.switch_to.frame(filtered_iframe)
 
 
     def filter_active_iframe(self, iframes):
@@ -756,7 +791,10 @@ class Base(unittest.TestCase):
         try:
             self.driver.execute_script("return arguments[0].scrollIntoView();", element)
         except Exception as e:
-            logger().debug(f"********Warining scroll_to_element exception: {str(e)}*********")
+            # Usa apenas a mensagem (sem o stacktrace) quando disponivel.
+            error_message = getattr(e, "msg", None) or str(e)
+            error_message = error_message.split("Stacktrace:")[0].strip()
+            logger().debug(f"********Warining scroll_to_element exception: {error_message}*********")
             pass
 
     def scroll_into_view(self, element):
@@ -832,7 +870,7 @@ class Base(unittest.TestCase):
         if zindex_list:
             return next(iter(zindex_list), None)
 
-    def select_combo(self, element, option, index=False, shadow_root=True, locator=False):
+    def select_combo(self, element, option, index=False, shadow_root=True, locator=False, by_click: bool = False):
         """
         Selects the option on the combobox.
 
@@ -846,42 +884,98 @@ class Base(unittest.TestCase):
         :type shadow_root: bool
         :param locator: bool value for locator True or False
         :type locator: bool
+        :param by_click: If True, selects the option by clicking on the combobox and then on the
+            desired option, simulating a real user interaction instead of using Selenium's
+            select_by_index/select_by_visible_text. - **Default:** False
+        :type by_click: bool
 
         Usage:
 
         >>> #Calling the method:
         >>> self.select_combo(element, "Chosen option")
         """
+        text_value = ""
 
-        combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
+        if isinstance(element, Select):
+            combo = element
+        else:
+            combo = self.return_combo_object(element, shadow_root=shadow_root, locator=locator)
+
+        if combo is None:
+            logger().warning("Combo object not found while trying to select value")
+            return False
+
+        if option is None:
+            logger().warning("Combo option is None, skipping selection")
+            return False
+
+        if not hasattr(combo, "options"):
+            logger().warning("Combo object has no options attribute")
+            return False
 
         if index:
             index_number = self.return_combo_index(combo, option)
             if index_number:
                 time.sleep(1)
-                combo.select_by_index(str(index_number))
+                if not by_click or not self.click_combo_option(combo, combo.options[index_number]):
+                    combo.select_by_index(str(index_number))
         else:
-            value = next(iter(filter(lambda x: x.text.lower().strip() == option.lower().strip() , combo.options)), None)
+            value = next(iter(filter(lambda x: x.text.lower().strip() == str(option).lower().strip() , combo.options)), None)
             if not value:
-                value = next(iter(filter(lambda x: x.text[0:len(option)].lower().strip()  == option.lower().strip() , combo.options)), None)
+                value = next(iter(filter(lambda x: x.text[0:len(str(option))].lower().strip()  == str(option).lower().strip() , combo.options)), None)
             if value:
                 time.sleep(1)
                 text_value = value.text
-                combo.select_by_visible_text(text_value)
+                if not by_click or not self.click_combo_option(combo, value):
+                    combo.select_by_visible_text(text_value)
                 logger().info(f"Selected value for combo is: {text_value}")
+                return text_value
+
+    def click_combo_option(self, combo, option_element):
+        """
+        [Internal]
+
+        Opens the combobox and clicks on the given option element, simulating a real user
+        interaction instead of using Selenium's select_by_index/select_by_visible_text.
+
+        Returns True if both clicks were performed successfully, False otherwise so callers
+        can fall back to the Selenium selection API.
+
+        :param combo: Selenium Select object
+        :type combo: selenium.webdriver.support.ui.Select
+        :param option_element: The option element to be clicked
+        :type option_element: Selenium WebElement
+        :return: True if the click sequence succeeded, False otherwise.
+        :rtype: bool
+        """
+        select_element = getattr(combo, "_el", None)
+
+        if select_element is None:
+            logger().warning("Could not resolve the select element for click-based selection, "
+                              "falling back to the default selection method")
+            return False
+
+        if not self.click(select_element, click_type=enum.ClickType.SELENIUM):
+            return False
+
+        time.sleep(0.5)
+
+        return self.click(option_element, click_type=enum.ClickType.SELENIUM)
 
     def return_combo_object(self, element, shadow_root=True, locator=False):
         """
         [Internal]
         """
-
-        if locator:
-            combo = Select(element)
-        elif self.webapp_shadowroot(shadow_root=shadow_root):
-            combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
-                                                      self.soup_to_selenium(element)))
-        else:
-            combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        try:
+            if locator:
+                combo = Select(element)
+            elif self.webapp_shadowroot(shadow_root=shadow_root):
+                combo = Select(self.driver.execute_script("return arguments[0].shadowRoot.querySelector('select')",
+                                                          self.soup_to_selenium(element)))
+            else:
+                combo = Select(self.driver.find_element(By.XPATH, xpath_soup(element)))
+        except:
+            return None
 
         return combo
 
@@ -896,6 +990,33 @@ class Base(unittest.TestCase):
             return combo.all_selected_options[0].text
         else:
             return ''
+
+    def clear_input(self, element):
+        """
+        [Internal]
+
+        Clears the content of an input element.
+
+        Selects the whole content with HOME + SHIFT + END and erases it with BACKSPACE,
+        avoiding the CTRL + A shortcut, that can be typed as a literal "a" in some inputs.
+
+        :param element: Selenium element
+        :type element: Selenium object
+
+        Usage:
+
+        >>> #Defining the element:
+        >>> element = lambda: self.driver.find_element(By.ID, "example_id")
+        >>> #Calling the method:
+        >>> self.clear_input(element())
+        """
+        try:
+            element.send_keys(Keys.HOME)
+            ActionChains(self.driver).key_down(Keys.SHIFT).send_keys(Keys.END).key_up(Keys.SHIFT).perform()
+            element.send_keys(Keys.BACK_SPACE)
+        except Exception:
+            ActionChains(self.driver).send_keys(Keys.HOME).key_down(Keys.SHIFT).send_keys(Keys.END) \
+                .key_up(Keys.SHIFT).send_keys(Keys.BACK_SPACE).perform()
 
     def send_keys(self, element, arg):
         """
@@ -922,11 +1043,10 @@ class Base(unittest.TestCase):
                 element.send_keys(Keys.CONTROL, 'a')
             element.send_keys(arg)
         except Exception:
-            actions = ActionChains(self.driver)
-            actions.move_to_element(element)
-            actions.click()
+            ActionChains(self.driver).move_to_element(element).click().perform()
             if arg.isprintable():
-                actions.key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE)
+                self.clear_input(element)
+            actions = ActionChains(self.driver)
             actions.send_keys(Keys.HOME)
             actions.send_keys(arg)
             actions.perform()
@@ -1165,6 +1285,27 @@ class Base(unittest.TestCase):
             normalized_config = self.normalize_config_name(config_name)
             setattr(self.config, normalized_config, value)
 
+    def get_browser_accept_languages(self, language):
+        """
+        Maps the config.json ``Language`` value to the browser's
+        ``intl.accept_languages`` preference string.
+
+        :param language: Language code from the config (e.g. "pt-br", "es-es", "en-us").
+        :type language: str
+        :return: The accept-languages string (e.g. "pt-BR, pt"). Falls back to
+            Brazilian Portuguese when the language is empty or unknown, matching
+            the LanguagePack default.
+        :rtype: str
+        """
+        language_map = {
+            "pt-br": "pt-BR, pt",
+            "es-es": "es-ES, es",
+            "en-us": "en-US, en",
+            "ru-ru": "ru-RU, ru",
+        }
+        key = language.lower().strip() if language else ""
+        return language_map.get(key, "pt-BR, pt")
+
     def Start(self):
         """
         Opens the browser maximized and goes to defined URL.
@@ -1194,6 +1335,10 @@ class Base(unittest.TestCase):
             log_path = os.devnull
 
             firefox_options = FirefoxOpt()
+            if self.config.language:
+                accept_languages = self.get_browser_accept_languages(self.config.language)
+                firefox_options.set_preference("intl.accept_languages", accept_languages)
+                logger().info(f"Firefox language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 firefox_options.add_argument('-headless')
             if self.config.ignore_certificate_errors:
@@ -1204,9 +1349,16 @@ class Base(unittest.TestCase):
                     pass
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
+            self.driver.set_page_load_timeout(120)
         elif self.config.browser.lower() == "chrome":
             chrome_options = ChromeOpt()
             driver_path = None
+            if self.config.language:
+                accept_languages = self.get_browser_accept_languages(self.config.language)
+                short_locale = accept_languages.split(",")[0].strip()
+                chrome_options.add_argument(f'--lang={short_locale}')
+                chrome_options.add_experimental_option("prefs", {"intl.accept_languages": accept_languages})
+                logger().info(f"Chrome language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 chrome_options.add_argument('--headless=new')
             chrome_options.add_argument('--log-level=3')
@@ -1241,6 +1393,7 @@ class Base(unittest.TestCase):
 
             service = ChromeService(executable_path=driver_path)
             self.driver = webdriver.Chrome(options=chrome_options, service=service)
+            self.driver.set_page_load_timeout(120)
 
         elif self.config.browser.lower() == "electron":
             driver_path = os.path.join(os.path.dirname(__file__), r'drivers\\windows\\electron\\chromedriver.exe')
@@ -1270,12 +1423,24 @@ class Base(unittest.TestCase):
             if window_size and not 768 in range(window_size['height'], window_size['height']+ 40):
                 logger().info(f"Screen size is different from default used in headless mode")
         self.wait = WebDriverWait(self.driver, self.config.time_out)
+        
+        Base.driver = self.driver
+        Base.wait = self.wait
 
         if not self.config.poui:
             if not self.config.skip_environment:
                 self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, start_program)))
-
-            self.driver.execute_script("app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1)")
+            try:
+                self.driver.execute_script(
+                "if (typeof app !== 'undefined' && app.resourceManager && "
+                "typeof app.resourceManager.storeValue === 'function') {"
+                " app.resourceManager.storeValue('x:\\\\automation.ini.general.tir', 1);"
+                "} else if (typeof window !== 'undefined' && window.localStorage) {"
+                " window.localStorage.setItem('x:\\\\automation.ini.general.tir', 1);"
+                "}"
+            )
+            except Exception as e:
+                logger().debug(f"app resource store Value Error: {e}")
 
     def get_url(self, url=None):
         """This method loads the URL in the browser and waits for the page to be ready.
@@ -1292,7 +1457,7 @@ class Base(unittest.TestCase):
 
         num_of_trying = 1
         while not get_url and num_of_trying <= 3:
-            self.driver.get(url)
+            self.driver_get(url=url)
 
             if self.config.skip_environment:
                 return
@@ -1310,6 +1475,32 @@ class Base(unittest.TestCase):
             except:
                 num_of_trying += 1
                 logger().info(f"Loading took too much time! num_of_trying: {str(num_of_trying)}")
+
+    def driver_get(self, url: str) -> None:
+        """Navigate the browser to the given URL with retry logic.
+
+        Attempts to load the URL repeatedly until success or timeout.
+        On ``TimeoutException`` the request is retried; any other exception
+        aborts immediately and logs the error.
+
+        Args:
+            url: The URL to navigate to.
+        """
+        endtime = time.time() + self.config.time_out
+        success = False
+
+        while time.time() < endtime and not success:
+            try:
+                self.driver.get(url)
+                success = True
+            except TimeoutException:
+                logger().info(f"Timeout while loading '{url}'. Retrying...")
+            except Exception as e:
+                logger().error(f"Unexpected error while loading '{url}': {e}")
+                break
+
+        if not success:
+            self.log_error(f"Failed to load page '{url}' within {self.config.time_out}s timeout.")
 
     def TearDown(self):
         """
@@ -1402,7 +1593,13 @@ class Base(unittest.TestCase):
             endtime = time.time() + self.config.time_out
             while time.time() < endtime and not current_ver:
                 try:
-                    current_ver = self.driver.execute_script("return app.VERSION")
+                    current_ver = self.driver.execute_script(
+                            "return (typeof app !== 'undefined' && app && app.VERSION)"
+                            " ? app.VERSION"
+                            " : ((typeof window !== 'undefined' && typeof window.getApplicationVersion === 'function')"
+                            " ? window.getApplicationVersion()"
+                            " : null)"
+                        )
                     if current_ver:
                         logger().info(f'Webapp: {current_ver}')
                         current_ver = re.sub(r'\.(.*)', '', current_ver)
@@ -1489,23 +1686,46 @@ class Base(unittest.TestCase):
         self.click(element, right_click=right_click)
 
     def find_by_locator(self, locator, selector, shadow_root):
+        """
+        [Internal]
 
+        Finds an element by locator. If the element is not found, finishes the test case with log_error.
+
+        :param locator: Selenium locator (By.ID, By.CSS_SELECTOR, By.XPATH...).
+        :param selector: Selector string used with the locator.
+        :param shadow_root: Whether the element should be searched inside shadow root (Webapp) or not (Poui).
+        :return: The Selenium element.
+        """
         element = None
+        wait_succeeded = True
 
-        self.wait.until(EC.element_to_be_clickable((locator, selector)))
+        try:
+            self.wait.until(EC.element_to_be_clickable((locator, selector)))
+        except TimeoutException:
+            logger().debug(f"Element '{selector}' ({locator}) was not clickable within the wait time")
+            wait_succeeded = False
 
-        endtime = time.time() + self.config.time_out
-        while time.time() < endtime and not element:
-            logger().info(f"Looking for element: '{selector}'")
+        if wait_succeeded:
+            use_shadow_root = self.webapp_shadowroot(shadow_root=shadow_root)
 
-            if self.webapp_shadowroot(shadow_root=shadow_root):
-                element = next(iter(
-                    self.find_shadow_element('input, select, button', self.driver.find_element(locator, selector))))
-            else:
-                element = self.driver.find_element(locator, selector)
+            endtime = time.time() + self.config.time_out
+            while time.time() < endtime and not element:
+                logger().info(f"Looking for element: '{selector}'")
+                try:
+                    found = self.driver.find_element(locator, selector)
+                    if use_shadow_root:
+                        shadow_elements = self.find_shadow_element('input, select, button', found)
+                        element = next(iter(shadow_elements), None) if shadow_elements else None
+                    else:
+                        element = found
+                except (NoSuchElementException, StaleElementReferenceException):
+                    element = None
+
+                if not element:
+                    time.sleep(0.5)
 
         if not element:
-            self.log_error(f"Element {element} doesn't found")
+            self.log_error(f"Element '{selector}' ({locator}) doesn't found!")
 
         return element
 
@@ -1552,8 +1772,9 @@ class Base(unittest.TestCase):
 
         non_blocked_elements = elements
 
-        # Only filter out blocked elements if 'WaitProcessing' is not in the stack
-        if not self.search_stack('WaitProcessing'):
+        # Filter blocked elements only when WaitProcessing is not in the stack
+        # and blocked-container filtering is enabled.
+        if not self.search_stack('WaitProcessing') and not self.search_stack('IfExists') and self.filter_blocked_containers:
             non_blocked_elements = list(filter(lambda x: hasattr(x, 'attr') and 'blocked' not in x.attrs, elements))
 
         if isinstance(non_blocked_elements, list):
@@ -1572,4 +1793,18 @@ class Base(unittest.TestCase):
 
         if pattern.findall(path):
             return pattern.sub(slash, path)
-    
+
+    def get_soup_select(self, selector, twebview=None, select_one=False):
+        """
+        Get a soup select object.
+
+        :param selector: Css selector
+        :param twebview: Force twebview mode. If None, keeps legacy behavior.
+        :param select_one: When True, returns only the first match.
+        :return: Return a soup select object
+        """
+        if twebview is None:
+            twebview = self.config.poui_login
+
+        soup = self.get_current_DOM(twebview=twebview)
+        return soup.select_one(selector) if select_one else soup.select(selector)

@@ -28,7 +28,18 @@ jobs:
 
   callDocker:
     needs: [deploy]
-    uses: ./.github/workflows/docker.yml
+    uses: ./.github/workflows/docker-deploy.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  callHarbor:
+    needs: [deploy]
+    uses: ./.github/workflows/harbor-deploy.yml
+    with:
+      release: ${{ github.event.release.tag_name }}
+      harbor_project: 'tir'
+    secrets:
+      HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+      HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+      HARBOR_REGISTRY: ${{ secrets.HARBOR_REGISTRY }}

@@ -88,6 +88,28 @@ class LanguagePack:
         self.procedure_install = languagepack["Procedure Install"]
         self.procedure_uninstall = languagepack["Procedure Uninstall"]
         self.schedule_menu = languagepack["Schedule Menu"]
+        self.input_set_program = languagepack["Input Set Program"]
+        self.new_home_menu_about = languagepack["New Home Menu About"]
+
+        self.filters = languagepack["Filters"]
+        self.apply_filters = languagepack["Apply Filters"]
+        self.remove_filters = languagepack["Remove Filters"]
+        self.remove_all_filters = languagepack["Remove All Filters"]
+        self.old_browse_edit = languagepack["Old Browse Edit"]
+        self.old_browse_delete = languagepack["Old Browse Delete"]
+        self.old_browse_insert = languagepack["Old Browse Insert"]
+        self.old_browse_other_actions = languagepack["Old Browse Other Actions"]
+
+        self.new_browse_edit = languagepack["New Browse Edit"]
+        self.new_browse_delete = languagepack["New Browse Delete"]
+        self.new_browse_insert = languagepack["New Browse Insert"]
+        self.new_browse_other_actions = languagepack["New Browse Other Actions"]
+
+        self.perform_advanced_search = languagepack["Perform Advanced Search"]
+        self.select = languagepack["Select"]
+
+        self.module = languagepack["Module"]
+        self.change_module = languagepack["Change Module"]
         
         self.messages = Messages(languagepack)
 
@@ -184,8 +206,28 @@ class LanguagePack:
             "Success": "Success",
             "Procedure Install": "Install selected processes",
             "Procedure Uninstall": "Remove selected processes",
-            "Schedule Menu": "Settings > Schedule > Schedule"
-            
+            "Schedule Menu": "Settings > Schedule > Schedule",
+            "Input Set Program": "Search and execute",
+            "New Home Menu About": "About",
+            "Filters": "Filters",
+            "Apply Filters": "Apply filters",
+            "Remove Filters": "Remove filters",
+            "Remove All Filters": "Remove all",
+
+            "Old Browse Edit":"Edit",
+            "Old Browse Delete":"Delete",
+            "Old Browse Insert":"Insert",
+            "Old Browse Other Actions":"Other Actions",
+
+            "New Browse Edit":"Edit",
+            "New Browse Delete":"Delete",
+            "New Browse Insert":"Add",
+            "New Browse Other Actions":"Line actions",
+
+            "Perform Advanced Search":"Perform Advanced Search.",
+            "Select":"Select",
+            "Module":"Module",
+            "Change Module":"Change module"
         }
 
         brazilian_portuguese = {
@@ -279,8 +321,28 @@ class LanguagePack:
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
-            "Schedule Menu": "Ambiente > Schedule > Schedule"
+            "Schedule Menu": "Ambiente > Schedule > Schedule",
+            "Input Set Program": "Pesquisar e executar",
+            "New Home Menu About": "Sobre",
+            "Filters": "Filtros",
+            "Apply Filters": "Aplicar Filtros",
+            "Remove Filters": "Remover filtros",
+            "Remove All Filters": "Remover todos",
 
+            "Old Browse Edit":"Alterar",
+            "Old Browse Delete":"Excluir",
+            "Old Browse Insert":"Incluir",
+            "Old Browse Other Actions":"Outras Ações",
+
+            "New Browse Edit":"Editar",
+            "New Browse Delete":"Excluir",
+            "New Browse Insert":"Incluir",
+            "New Browse Other Actions":"Ações de registro",
+
+            "Perform Advanced Search":"Fazer busca avançada.",
+            "Select":"Selecionar",
+            "Module":"Módulo",
+            "Change Module":"Alterar módulo"
         }
         spanish = {
             "User": "Usuário",
@@ -373,8 +435,27 @@ class LanguagePack:
             "Success": "Sucessos",
             "Procedure Install": "Instalar processos selecionados",
             "Procedure Uninstall": "Remover processos selecionados",
-            "Schedule Menu": "Entorno > Schedule > Schedule"
+            "Schedule Menu": "Entorno > Schedule > Schedule",
+            "Input Set Program": "Buscar y ejecutar",
+            "New Home Menu About": "Sobre",
+            "Filters": "Filtros",
+            "Apply Filters": "Aplicar Filtros",
+            "Remove Filters": "Eliminar filtros",
+            "Remove All Filters": "Eliminar todos",
+            "Old Browse Edit":"Modificar",
+            "Old Browse Delete":"Borrar",
+            "Old Browse Insert":"Incluir",
+            "Old Browse Other Actions":"Otras acciones",
+            
+            "New Browse Edit":"Edit",
+            "New Browse Delete":"Eliminar",
+            "New Browse Insert":"Incluir",
+            "New Browse Other Actions":"Acciones de registro",
 
+            "Perform Advanced Search":"Realizar búsqueda avanzada.",
+            "Select":"Seleccionar",
+            "Module":"Módulo",
+            "Change Module":"Cambiar módulo"
         }
         russian = {
             "User": "Пользователь",
@@ -469,7 +550,28 @@ class LanguagePack:
             "Success": "успех",
             "Procedure Install": "Установить выбранные процессы",
             "Procedure Uninstall": "Удалить выбранные процессы",
-            "Schedule Menu": "Settings > Schedule > Schedule"
+            "Schedule Menu": "Settings > Schedule > Schedule",
+            "Input Set Program": "Ищи и беги",
+            "New Home Menu About": "О программе…",
+            "Filters": "Фильтры",
+            "Apply Filters": "Применить фильтры",
+            "Remove Filters": "Удалить фильтры",
+            "Remove All Filters": "Удалить все",
+
+            "Old Browse Edit":"Редактировать",
+            "Old Browse Delete":"Удалить",
+            "Old Browse Insert":"Включать",
+            "Old Browse Other Actions":"Другие действия",
+            
+            "New Browse Edit":"Редактировать",            
+            "New Browse Delete":"Удалить",
+            "New Browse Insert":"Включать",
+            "New Browse Other Actions":"Линейные действия",
+
+            "Perform Advanced Search":"Выполните расширенный поиск.",
+            "Select":"Выбирать",
+            "Module":"Модуль",
+            "Change Module":"Модуль изменений"
         }
 
         if language.lower() == "en-us":
