@@ -1087,7 +1087,11 @@ class Base(unittest.TestCase):
         try:
             if twebview:
                 self.switch_to_iframe()
-            
+
+            if element is None:
+                logger().debug("********Element is None set_element_focus*********")
+                return
+
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
             logger().exception("********Element Stale set_element_focus*********")
