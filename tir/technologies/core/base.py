@@ -65,6 +65,7 @@ class Base(unittest.TestCase):
 
     _shared_driver = None
     _shared_wait = None
+    _shared_restart_counter = 0
     errors = []
     
     @property
@@ -86,6 +87,16 @@ class Base(unittest.TestCase):
     def wait(self, value):
         """Property to update the shared wait for all instances"""
         Base._shared_wait = value
+    
+    @property
+    def restart_counter(self):
+        """Property to always get the current shared restart counter"""
+        return Base._shared_restart_counter
+    
+    @restart_counter.setter
+    def restart_counter(self, value):
+        """Property to update the shared restart counter for all instances"""
+        Base._shared_restart_counter = value
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -1087,7 +1098,11 @@ class Base(unittest.TestCase):
         try:
             if twebview:
                 self.switch_to_iframe()
-            
+
+            if element is None:
+                logger().debug("********Element is None set_element_focus*********")
+                return
+
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
             logger().exception("********Element Stale set_element_focus*********")
