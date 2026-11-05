@@ -65,6 +65,7 @@ class Base(unittest.TestCase):
 
     _shared_driver = None
     _shared_wait = None
+    _shared_restart_counter = 0
     errors = []
     
     @property
@@ -86,6 +87,16 @@ class Base(unittest.TestCase):
     def wait(self, value):
         """Property to update the shared wait for all instances"""
         Base._shared_wait = value
+    
+    @property
+    def restart_counter(self):
+        """Property to always get the current shared restart counter"""
+        return Base._shared_restart_counter
+    
+    @restart_counter.setter
+    def restart_counter(self, value):
+        """Property to update the shared restart counter for all instances"""
+        Base._shared_restart_counter = value
     
     def __init__(self, config_path="", autostart=True):
         """

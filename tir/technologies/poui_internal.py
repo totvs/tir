@@ -95,7 +95,6 @@ class PouiInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-        self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
@@ -2296,7 +2295,7 @@ class PouiInternal(Base):
             self.click(self.driver.find_element(By.XPATH, xpath_soup(button)))
             time.sleep(1)
         self.restart_counter += 1
-        self.log_error(message, restart_counter_param=self.restart_counter)
+        self.log_error(message)
 
     def create_message(self, args, message_type=enum.MessageType.CORRECT):
         """
@@ -2698,9 +2697,9 @@ class PouiInternal(Base):
                     return False
                 self.restart_counter += 1
                 if presence:
-                    self.log_error(f"Element '{term}' not found!", restart_counter_param=self.restart_counter)
+                    self.log_error(f"Element '{term}' not found!")
                 else:
-                    self.log_error(f"Element '{term}' remained on screen until timeout (expected it to disappear)!", restart_counter_param=self.restart_counter)
+                    self.log_error(f"Element '{term}' remained on screen until timeout (expected it to disappear)!")
 
         presence_endtime = time.time() + 10
         if presence:
@@ -2987,7 +2986,7 @@ class PouiInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True, skip_restart=False, restart_counter_param=None):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
@@ -3005,7 +3004,7 @@ class PouiInternal(Base):
         """
 
         from tir.technologies.core.events import emit
-        emit('webapp.log_error', message=message, new_log_line=new_log_line, skip_restart=skip_restart, restart_counter_param=restart_counter_param)
+        emit('webapp.log_error', message=message, new_log_line=new_log_line, skip_restart=skip_restart)
 
         return
     
@@ -5389,7 +5388,9 @@ class PouiInternal(Base):
             if program_call:
                 self.config.routine_type = ''
                 self.config.routine = ''
-            self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
+            if self.log.get_testcase_stack() == 'setUpClass':
+                self.restart_counter = 3
+            self.log_error(message)
 
         po_item_list_div = po_item_list.find_next('div')
         self.scroll_to_element(self.soup_to_selenium(po_item_list_div, twebview=True))
@@ -5899,7 +5900,9 @@ class PouiInternal(Base):
             message = f"Item list '{program_desc}' not found!"
             self.config.routine_type = ''
             self.config.routine = ''
-            self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
+            if self.log.get_testcase_stack() == 'setUpClass':
+                self.restart_counter = 3
+            self.log_error(message)
         item_list_data = self._get_item_list_data(po_item_list)
         return item_list_data.get('value').split('-')[0].strip().upper()
     
@@ -5970,7 +5973,7 @@ class PouiInternal(Base):
 
         if not success:
             self.restart_counter += 1
-            self.log_error('Home screen not found!', restart_counter_param=self.restart_counter)
+            self.log_error('Home screen not found!')
 
     def click_close_button_to_menu(self):
         """[Internal]
