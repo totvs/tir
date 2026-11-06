@@ -4058,6 +4058,16 @@ class PouiInternal(Base):
                     map(lambda x: x.find('po-field-container').select('span, label')[0], po_component_filtered))))
             else:
                 po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), po_component))
+
+                # Prefers elements whose text is equal to the field (e.g. "Liquidar" instead of "Reliquidar").
+                # Falls back to the "contains" result when there are not enough exact matches for the position.
+                exact_match = list(filter(lambda x: x.text.strip().lower() == str(field).strip().lower(), po_component_span))
+                if len(exact_match) > position:
+                    po_component_span = exact_match
+                    logger().debug(f"'{field}': exact match")
+                elif po_component_span:
+                    logger().debug(f"'{field}': partial match")
+
                 if len(po_component_span) > 1:
                     has_index = list(filter(lambda x: self.return_index_element(x), po_component_span))
                     if has_index:

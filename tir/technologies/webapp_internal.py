@@ -5000,6 +5000,15 @@ class WebappInternal(Base):
         if button_candidates:
             filtered_buttons = list(filter(lambda x: hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower()) and self.element_is_displayed(x), button_candidates))
 
+            # Prefers buttons whose caption is equal to the requested one (e.g. "Liquidar" instead of "Reliquidar").
+            # Falls back to the "contains" result when there are not enough exact matches for the position.
+            exact_match = list(filter(lambda x: re.sub(regex, '', x['caption']).strip().lower() == button.strip().lower(), filtered_buttons))
+            if len(exact_match) > position:
+                filtered_buttons = exact_match
+                logger().debug(f"'{button}': exact match")
+            elif filtered_buttons:
+                logger().debug(f"'{button}': partial match")
+
             if not filtered_buttons:
                 filtered_buttons = self.return_soup_by_selenium(elements=button_candidates, term=button, selectors='label, span')
         else:
@@ -5014,6 +5023,15 @@ class WebappInternal(Base):
         # Fallback: botao em foco entre os candidatos
         if not (filtered_buttons and len(filtered_buttons) - 1 >= position):
             focus_buttons = list(filter(lambda x: (hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower())) and 'focus' in x.get('class'), button_candidates))
+
+            # Same preference for the exact caption among the focused buttons.
+            exact_match = list(filter(lambda x: re.sub(regex, '', x['caption']).strip().lower() == button.strip().lower(), focus_buttons))
+            if len(exact_match) > position:
+                focus_buttons = exact_match
+                logger().debug(f"'{button}': exact match (focus)")
+            elif focus_buttons:
+                logger().debug(f"'{button}': partial match (focus)")
+
             if focus_buttons:
                 filtered_buttons = focus_buttons
 
