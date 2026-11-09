@@ -6965,42 +6965,77 @@ class PouiInternal(Base):
         :type input_element: bs4.element.Tag
         :param value: Value to search and select in the lookup.
         :type value: str
+        :param field: Field label, used in log messages. - **Default:** '' (empty string)
+        :type field: str
         :return: None
 
-        The whole process (fill -> wait loading -> select item) is retried until
-        ``config.time_out``. Each attempt has a slice of ``time_out / 3`` (at least 3 attempts),
-        and the inner steps run without ``log_error`` so a single failure doesn't end the test.
+        The whole process (erase -> fill -> wait loading -> select item) is retried until
+        ``config.time_out``, in three stages. Each stage has ``time_out / 3`` and always runs
+        at least one attempt, changing how the field is erased and typed:
+
+        1. ``default``: sends the value at once; from the second attempt on, erases with CTRL+A and BACKSPACE.
+        2. ``backspace_per_char``: erases with one BACKSPACE per character and ``clear()``, then sends the value.
+        3. ``slow_typing``: erases like stage 2 and types one character at a time.
+
+        The loop ends early when the suggestion list shows the "no results found" row.
+        The inner steps run without ``log_error`` so a single failure doesn't end the test.
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._fill_lookup_input(input_element, '000001', 'Code')
         """
         loading_appear_timeout = 5
         list_timeout = 10
+        min_attempt_time = loading_appear_timeout + list_timeout + 1
+        typing_interval = 0.1
+        stages = ('default', 'backspace_per_char', 'slow_typing')
 
         total_timeout = self.config.time_out
         endtime = time.time() + total_timeout
-        attempt_budget = total_timeout / 3
+        stage_budget = total_timeout / len(stages)
         attempt = 0
         filled = False
         success = False
+        no_results = False
 
-        while not success and time.time() < endtime:
-            attempt += 1
-            attempt_end = min(time.time() + attempt_budget, endtime)
-            logger().info(f"Filling lookup '{field}' with '{value}'. Attempt {attempt}.")
+        for stage_number, stage in enumerate(stages, start=1):
+            stage_end = min(time.time() + stage_budget, endtime)
+            stage_attempt = 0
 
-            if attempt > 1:
-                self._erase_input_with_backspace(input_element)
+            # The first attempt of each stage always runs, so every strategy is tried at least once.
+            while not (success or no_results) and (stage_attempt == 0 or time.time() < stage_end):
+                attempt += 1
+                stage_attempt += 1
+                attempt_end = stage_end if stage_attempt > 1 else max(stage_end, time.time() + min_attempt_time)
+                logger().info(f"Filling lookup '{field}' with '{value}'. Attempt {attempt} "
+                              f"(stage {stage_number}/{len(stages)}: {stage}).")
 
-            fill_timeout = max(attempt_end - time.time() - loading_appear_timeout - list_timeout, 1)
-            filled = self._fill_input(input_element, value, field, timeout=fill_timeout, check_error=False)
-            if not filled:
-                logger().debug(f"Lookup '{field}' couldn't be filled on attempt {attempt}.")
-                continue
+                if stage == 'default':
+                    if attempt > 1:
+                        self._erase_input_with_backspace(input_element)
+                else:
+                    self._erase_input_per_character(input_element)
 
-            self._po_loading(timeout_appear=min(loading_appear_timeout, max(endtime - time.time(), 1)))
+                fill_timeout = max(attempt_end - time.time() - loading_appear_timeout - list_timeout, 1)
+                filled = self._fill_input(input_element, value, field, timeout=fill_timeout, check_error=False,
+                                          typing_interval=typing_interval if stage == 'slow_typing' else 0)
+                if not filled:
+                    logger().debug(f"Lookup '{field}' couldn't be filled on attempt {attempt}.")
+                    continue
 
-            item_timeout = min(list_timeout, max(attempt_end - time.time(), 1))
-            success = self._click_lookup_item(value, timeout=item_timeout, check_error=False)
-            if not success:
-                logger().debug(f"Lookup item '{value}' not selected on attempt {attempt}.")
+                self._po_loading(timeout_appear=min(loading_appear_timeout, max(attempt_end - time.time(), 1)))
+
+                item_timeout = min(list_timeout, max(attempt_end - time.time(), 1))
+                success = self._click_lookup_item(value, timeout=item_timeout, check_error=False)
+                if not success:
+                    logger().debug(f"Lookup item '{value}' not selected on attempt {attempt}.")
+                    no_results = self._lookup_has_no_results()
+                    if no_results:
+                        logger().info(f"Lookup '{field}' shows no results for '{value}'. Stopping attempts.")
+
+            if success or no_results:
+                break
 
         if not success:
             if not filled:
@@ -7031,6 +7066,83 @@ class PouiInternal(Base):
         except Exception as e:
             logger().debug(f"Error erasing input with backspace: {e}")
 
+    def _erase_input_per_character(self, input_element, key_interval: float = 0.05) -> None:
+        """
+        [Internal]
+
+        Erases the content of an input pressing BACKSPACE once per character, then makes sure it is empty
+        with ``clear()`` and waits for the component to react to the empty value.
+        Used when erasing everything at once doesn't make the component refresh its search.
+
+        :param input_element: BeautifulSoup input element.
+        :type input_element: bs4.element.Tag
+        :param key_interval: Seconds between each BACKSPACE. - **Default:** 0.05
+        :type key_interval: float
+        :return: None
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._erase_input_per_character(input_element)
+        """
+        try:
+            self.switch_to_iframe()
+            input_field_element = lambda: self.soup_to_selenium(input_element)
+
+            self.scroll_to_element(input_field_element())
+            self.set_element_focus(input_field_element())
+            self.click(input_field_element())
+
+            current_value = self.get_web_value(input_field_element()) or ''
+            logger().debug(f"Erasing {len(current_value)} character(s) with backspace.")
+
+            input_field_element().send_keys(Keys.END)
+            for _ in range(len(current_value)):
+                input_field_element().send_keys(Keys.BACKSPACE)
+                time.sleep(key_interval)
+
+            if self.get_web_value(input_field_element()):
+                input_field_element().clear()
+        except Exception as e:
+            logger().debug(f"Error erasing input per character: {e}")
+
+        # Gives the component time to process the empty value before the next fill.
+        self._po_loading(timeout_appear=1)
+
+    def _lookup_has_no_results(self, recheck_delay: float = 1) -> bool:
+        """
+        [Internal]
+
+        Checks if the displayed lookup suggestion list shows the "no results found" row.
+        The row is found by its CSS class, so it works in any screen language.
+        The check is repeated after ``recheck_delay`` to avoid a message left by a previous search.
+
+        :param recheck_delay: Seconds to wait before confirming the message. - **Default:** 1
+        :type recheck_delay: float
+        :return: True if the "no results found" row is displayed in both checks, otherwise False.
+        :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> if self._lookup_has_no_results():
+        >>>     self.log_error("Lookup item not found.")
+        """
+        selector = 'thf-lookup-list .thf-lookup-item-list__action_notfound'
+
+        def is_shown():
+            try:
+                return bool(self.get_container_elements(selector, select_all=False, filter_displayeds=True))
+            except Exception as e:
+                logger().debug(f"Error checking lookup 'no results' row: {e}")
+                return False
+
+        if not is_shown():
+            return False
+
+        time.sleep(recheck_delay)
+        return is_shown()
+
     def _click_lookup_item(self, value, timeout: int = 10, check_error: bool = True) -> bool:
         """
         [Internal]
@@ -7059,7 +7171,8 @@ class PouiInternal(Base):
         return False
 
 
-    def _fill_input(self, input_element, value: str, field: str = '', timeout=None, check_error: bool = True) -> bool:
+    def _fill_input(self, input_element, value: str, field: str = '', timeout=None, check_error: bool = True,
+                    typing_interval: float = 0) -> bool:
         """
         [Internal]
 
@@ -7073,8 +7186,17 @@ class PouiInternal(Base):
         :type timeout: float
         :param check_error: If True, calls log_error when the field can't be filled. - **Default:** True
         :type check_error: bool
+        :param typing_interval: Seconds between each typed character. If 0, the value is sent at once. - **Default:** 0
+        :type typing_interval: float
         :return: True if the field holds the value, otherwise False.
         :rtype: bool
+
+        Usage:
+
+        >>> # Calling the method:
+        >>> self._fill_input(input_element, '000001', 'Code')
+        >>> # Typing one character at a time:
+        >>> self._fill_input(input_element, '000001', 'Code', typing_interval=0.1)
         """
         success = False
 
@@ -7095,7 +7217,13 @@ class PouiInternal(Base):
                     logger().debug(f"clear() failed, falling back to select-all + delete: {clear_error}")
                     ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.DELETE).perform()
 
-                input_field_element().send_keys(value)
+                if typing_interval > 0:
+                    # Typing like a user makes components that react to each key refresh their search.
+                    for char in value:
+                        input_field_element().send_keys(char)
+                        time.sleep(typing_interval)
+                else:
+                    input_field_element().send_keys(value)
                 ActionChains(self.driver).key_down(Keys.ENTER).perform()
                 ActionChains(self.driver).key_down(Keys.TAB).perform()
 
