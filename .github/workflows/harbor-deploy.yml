@@ -103,7 +103,12 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          push: true
+          # Força manifesto Docker v2 (schema2) em vez de OCI. Clientes que
+          # pedem só o media type Docker recebem MANIFEST_UNKNOWN ("OCI
+          # manifest found, but accept header does not support OCI manifests").
+          # provenance/sbom=false sozinhos não garantem isso em versões novas
+          # do BuildKit, que passaram a usar OCI por padrão.
+          outputs: type=registry,oci-mediatypes=false
           provenance: false
           sbom: false
           tags: |
@@ -111,6 +116,18 @@ jobs:
             ${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify manifest media type
+        run: |
+          for TAG in "${{ steps.version.outputs.version }}" latest; do
+            IMAGE="${{ steps.clean.outputs.registry }}/${{ steps.project.outputs.name }}/${{ env.IMAGE_NAME }}:${TAG}"
+            MEDIA_TYPE=$(docker buildx imagetools inspect --raw "$IMAGE" | jq -r '.mediaType')
+            echo "${IMAGE} -> ${MEDIA_TYPE}"
+            if [ "$MEDIA_TYPE" != "application/vnd.docker.distribution.manifest.v2+json" ]; then
+              echo "::error::Manifesto de ${IMAGE} não é Docker v2 schema2 (${MEDIA_TYPE})"
+              exit 1
+            fi
+          done
 
       - name: Image pushed successfully
         run: |
