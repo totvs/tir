@@ -65,6 +65,7 @@ class Base(unittest.TestCase):
 
     _shared_driver = None
     _shared_wait = None
+    _shared_restart_counter = 0
     errors = []
     
     @property
@@ -86,6 +87,16 @@ class Base(unittest.TestCase):
     def wait(self, value):
         """Property to update the shared wait for all instances"""
         Base._shared_wait = value
+    
+    @property
+    def restart_counter(self):
+        """Property to always get the current shared restart counter"""
+        return Base._shared_restart_counter
+    
+    @restart_counter.setter
+    def restart_counter(self, value):
+        """Property to update the shared restart counter for all instances"""
+        Base._shared_restart_counter = value
     
     def __init__(self, config_path="", autostart=True):
         """
@@ -1087,7 +1098,11 @@ class Base(unittest.TestCase):
         try:
             if twebview:
                 self.switch_to_iframe()
-            
+
+            if element is None:
+                logger().debug("********Element is None set_element_focus*********")
+                return
+
             self.driver.execute_script("window.focus(); arguments[0].focus();", element)
         except StaleElementReferenceException:
             logger().exception("********Element Stale set_element_focus*********")
@@ -1341,6 +1356,12 @@ class Base(unittest.TestCase):
                 logger().info(f"Firefox language set to '{accept_languages}' (config Language: '{self.config.language}')")
             if self.config.headless:
                 firefox_options.add_argument('-headless')
+            if self.config.ignore_certificate_errors:
+                try:
+                    firefox_options.set_capability("acceptInsecureCerts", True)
+                    firefox_options.set_preference("webdriver_accept_untrusted_certs", True)
+                except Exception:
+                    pass
             service = FirefoxService(executable_path=driver_path, log_path=log_path)
             self.driver = webdriver.Firefox(options=firefox_options, service=service)
             self.driver.set_page_load_timeout(120)
@@ -1358,6 +1379,8 @@ class Base(unittest.TestCase):
             chrome_options.add_argument('--log-level=3')
             if self.config.headless:
                 chrome_options.add_argument('force-device-scale-factor=0.77')
+            if self.config.ignore_certificate_errors:
+                chrome_options.add_argument('--ignore-certificate-errors')
 
             if self.config.chromedriver_auto_install:
 
@@ -1395,6 +1418,8 @@ class Base(unittest.TestCase):
             chrome_options.add_argument(f'--url="{self.config.url}"')
             chrome_options.add_argument(f'--program="{self.config.start_program}"')
             chrome_options.add_argument('--quiet')
+            if self.config.ignore_certificate_errors:
+                chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.binary_location = self.config.electron_binary_path
             self.driver = webdriver.Chrome(options=chrome_options, executable_path=driver_path)
 

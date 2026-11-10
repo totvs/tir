@@ -105,7 +105,6 @@ class WebappInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-        self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
         self.blocker = None
@@ -1174,9 +1173,9 @@ class WebappInternal(Base):
         Fills the module/environment field on the environment screen with the value configured in config.json.
         Retries until the value matches or the timeout is reached. Skips filling if the field is disabled.
 
-        When ``initial_program`` is ``sigaadv`` and the environment field is not present on the screen
-        (e.g. Protheus release >= 2610 with the new home screen), the loop exits immediately to avoid
-        running until timeout.
+        When ``initial_program`` is ``sigaadv`` or ``sigmdi`` and the environment field is not present
+        on the screen (e.g. Protheus release >= 2610 with the new home screen), the loop exits immediately
+        to avoid running until timeout.
 
         :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
         :type shadow_root: bool
@@ -1199,8 +1198,8 @@ class WebappInternal(Base):
                     environment_element = next(iter(environment_elements))
                     environment_element = environment_element.find_parent('pro-system-module-lookup')
                     environment_element = next(iter(environment_element.select('input')), None)
-                elif not environment_elements and (self.config.initial_program or '').lower().strip() == 'sigaadv':
-                    logger().debug('Skipping environment fill: initial_program is sigaadv and no environment field found (release >= 2610).')
+                elif not environment_elements and (self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']:
+                    logger().debug('Skipping environment fill: initial_program is sigaadv or sigamdi and no environment field found (release >= 2610).')
                     enable = False
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
@@ -5001,6 +5000,15 @@ class WebappInternal(Base):
         if button_candidates:
             filtered_buttons = list(filter(lambda x: hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower()) and self.element_is_displayed(x), button_candidates))
 
+            # Prefers buttons whose caption is equal to the requested one (e.g. "Liquidar" instead of "Reliquidar").
+            # Falls back to the "contains" result when there are not enough exact matches for the position.
+            exact_match = list(filter(lambda x: re.sub(regex, '', x['caption']).strip().lower() == button.strip().lower(), filtered_buttons))
+            if len(exact_match) > position:
+                filtered_buttons = exact_match
+                logger().debug(f"'{button}': exact match")
+            elif filtered_buttons:
+                logger().debug(f"'{button}': partial match")
+
             if not filtered_buttons:
                 filtered_buttons = self.return_soup_by_selenium(elements=button_candidates, term=button, selectors='label, span')
         else:
@@ -5015,6 +5023,15 @@ class WebappInternal(Base):
         # Fallback: botao em foco entre os candidatos
         if not (filtered_buttons and len(filtered_buttons) - 1 >= position):
             focus_buttons = list(filter(lambda x: (hasattr(x, 'caption') and button.lower() in re.sub(regex, '', x['caption'].lower())) and 'focus' in x.get('class'), button_candidates))
+
+            # Same preference for the exact caption among the focused buttons.
+            exact_match = list(filter(lambda x: re.sub(regex, '', x['caption']).strip().lower() == button.strip().lower(), focus_buttons))
+            if len(exact_match) > position:
+                focus_buttons = exact_match
+                logger().debug(f"'{button}': exact match (focus)")
+            elif focus_buttons:
+                logger().debug(f"'{button}': partial match (focus)")
+
             if focus_buttons:
                 filtered_buttons = focus_buttons
 
@@ -9796,7 +9813,7 @@ class WebappInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
 
-    def log_error(self, message, new_log_line=True, skip_restart=False, restart_counter_param=None):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
@@ -9821,8 +9838,6 @@ class WebappInternal(Base):
 
         if self.config.smart_test:
             self.log.log_exec_file()
-
-        self.restart_counter = restart_counter_param if restart_counter_param else self.restart_counter
 
         self.clear_grid()
         logger().warning(f"Warning log_error {message}")

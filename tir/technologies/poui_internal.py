@@ -95,7 +95,6 @@ class PouiInternal(Base):
         self.grid_input = []
         self.down_loop_grid = False
         self.num_exec = NumExec()
-        self.restart_counter = 0
         self.used_ids = {}
         self.tss = False
         self.restart_coverage = True
@@ -113,6 +112,7 @@ class PouiInternal(Base):
             "input":"[class*='po-input'], thf-lookup, .po-search-input"
         }
         self.closed_user_guide_routines = []
+        self.selected_routines_module = []
         
         if not Base.driver:
             Base.driver = self.driver
@@ -2699,7 +2699,7 @@ class PouiInternal(Base):
                 if presence:
                     self.log_error(f"Element '{term}' not found!")
                 else:
-                    self.log_error(f"Unexpected element '{term}' found!")
+                    self.log_error(f"Element '{term}' remained on screen until timeout (expected it to disappear)!")
 
         presence_endtime = time.time() + 10
         if presence:
@@ -2986,7 +2986,7 @@ class PouiInternal(Base):
         except AttributeError:
             return self.search_element_position(label_text)
             
-    def log_error(self, message, new_log_line=True, skip_restart=False, restart_counter_param=None):
+    def log_error(self, message, new_log_line=True, skip_restart=False):
         """
         [Internal]
 
@@ -3004,7 +3004,7 @@ class PouiInternal(Base):
         """
 
         from tir.technologies.core.events import emit
-        emit('webapp.log_error', message=message, new_log_line=new_log_line, skip_restart=skip_restart, restart_counter_param=restart_counter_param)
+        emit('webapp.log_error', message=message, new_log_line=new_log_line, skip_restart=skip_restart)
 
         return
     
@@ -3449,6 +3449,9 @@ class PouiInternal(Base):
 
         except TimeoutException as e:
             logger().exception(f"Warning waint_until_to TimeoutException - Expected Condition: {expected_condition}")
+            pass
+        except StaleElementReferenceException as e:
+            logger().exception(f"Element is stale, skipping...")
             pass
 
         if timeout:
@@ -4055,6 +4058,16 @@ class PouiInternal(Base):
                     map(lambda x: x.find('po-field-container').select('span, label')[0], po_component_filtered))))
             else:
                 po_component_span = list(filter(lambda x: field.lower() in x.text.lower(), po_component))
+
+                # Prefers elements whose text is equal to the field (e.g. "Liquidar" instead of "Reliquidar").
+                # Falls back to the "contains" result when there are not enough exact matches for the position.
+                exact_match = list(filter(lambda x: x.text.strip().lower() == str(field).strip().lower(), po_component_span))
+                if len(exact_match) > position:
+                    po_component_span = exact_match
+                    logger().debug(f"'{field}': exact match")
+                elif po_component_span:
+                    logger().debug(f"'{field}': partial match")
+
                 if len(po_component_span) > 1:
                     has_index = list(filter(lambda x: self.return_index_element(x), po_component_span))
                     if has_index:
@@ -4068,7 +4081,7 @@ class PouiInternal(Base):
         if hasattr(element.find_parent('div', {'tabindex': '-1'}), 'attr'):
             return element if element.find_parent('div', {'tabindex': '-1'}) else None
 
-    def _po_loading(self, selector: str = '') -> None:
+    def _po_loading(self, selector: str = '', timeout_appear: int = 15) -> None:
         """
         [Internal]
         
@@ -4099,27 +4112,31 @@ class PouiInternal(Base):
         logger().info("Waiting loading...")
 
         main_container = selector or 'body'
+        term_loading = 'po-loading'
         
         # Wait up to 15 seconds for po-loading to appear
         loading_found = self.wait_element_timeout(
-            term='po-loading',
+            term=term_loading,
             scrap_type=enum.ScrapType.CSS_SELECTOR,
-            timeout=15,
+            timeout=timeout_appear,
             main_container=main_container,
+            twebview=True
         )
         
         # If po-loading was found, wait for it to disappear
         if loading_found:
             logger().info("Po-loading found. Waiting for it to disappear...")
             self.wait_element(
-                term='po-loading',
+                term=term_loading,
                 scrap_type=enum.ScrapType.CSS_SELECTOR,
                 presence=False,
                 main_container=main_container,
-                check_error=False
+                check_error=False,
+                twebview=True
             )
         else:
             logger().info("Po-loading not found, continuing without waiting...")
+            return
 
         logger().info("Loading finished!")
         
@@ -4722,8 +4739,8 @@ class PouiInternal(Base):
             columns_numbers = list(map(lambda x: headers[grid_number][x], expected_columns))
 
             if difference:
-                logger.warning(f"Columns '{difference}' not found in table")
-                return
+                logger().warning(f"Columns '{difference}' not found in table")
+                return []
 
         grid_rows = grid.select('tbody tr')
 
@@ -4732,7 +4749,7 @@ class PouiInternal(Base):
 
             if len(row_columns) < len(columns) or not row_columns:
                 self.log_error(f"There are not number of columns present in the grid")
-                return
+                return []
 
             filtered_columns = [row_columns[x] for x in columns_numbers] if columns_numbers else row_columns
             if filtered_columns:
@@ -4743,6 +4760,8 @@ class PouiInternal(Base):
                     matching_row_indices.append(grid_rows.index(row))
                     if not match_all:
                         return matching_row_indices
+
+        return matching_row_indices
 
 
     def _find_matching_column(self, grid_headers, column_name):
@@ -5382,7 +5401,9 @@ class PouiInternal(Base):
             if program_call:
                 self.config.routine_type = ''
                 self.config.routine = ''
-            self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
+            if self.log.get_testcase_stack() == 'setUpClass':
+                self.restart_counter = 3
+            self.log_error(message)
 
         po_item_list_div = po_item_list.find_next('div')
         self.scroll_to_element(self.soup_to_selenium(po_item_list_div, twebview=True))
@@ -5892,7 +5913,9 @@ class PouiInternal(Base):
             message = f"Item list '{program_desc}' not found!"
             self.config.routine_type = ''
             self.config.routine = ''
-            self.log_error(message, restart_counter_param=3 if self.log.get_testcase_stack() == 'setUpClass' else 0)
+            if self.log.get_testcase_stack() == 'setUpClass':
+                self.restart_counter = 3
+            self.log_error(message)
         item_list_data = self._get_item_list_data(po_item_list)
         return item_list_data.get('value').split('-')[0].strip().upper()
     
@@ -5963,7 +5986,7 @@ class PouiInternal(Base):
 
         if not success:
             self.restart_counter += 1
-            self.log_error('Home screen not found!', restart_counter_param=self.restart_counter)
+            self.log_error('Home screen not found!')
 
     def click_close_button_to_menu(self):
         """[Internal]
@@ -6072,7 +6095,7 @@ class PouiInternal(Base):
 
         self.set_program(program_name, program_desc, module)
 
-    def ensure_load_after_program(self, timeout: int = None) -> None:
+    def _ensure_load_after_program(self, timeout: int = None) -> None:
         """
         [Internal]
 
@@ -6097,8 +6120,8 @@ class PouiInternal(Base):
 
         Usage:
 
-        >>> self.ensure_load_after_program()
-        >>> self.ensure_load_after_program(timeout=90)
+        >>> self._ensure_load_after_program()
+        >>> self._ensure_load_after_program(timeout=90)
         """
 
         if timeout is None:
@@ -6106,13 +6129,14 @@ class PouiInternal(Base):
 
         # CSS selectors that identify each expected landing screen after opening
         # a routine. Adjust here if a new landing screen needs to be supported.
-        expected_screens = {
-            "browse": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
-                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
-                       ".dict-brgetddb, .dict-msselbr, thf-grid"),
+        expected_screens = {            
+            "new_browser": "po-table, kendo-grid, thf-grid",
+            "old_browser": "[style*='fwskin_seekbar_ico']",
             "wizard": "wa-dialog wa-stepper, wa-dialog [class*='wizard'], .twizard, .dict-msdialog",
-            "parameters": ("wa-dialog wa-text-input, wa-dialog .dict-tget, "
-                           ".tmodaldialog .tget"),
+            "parameters": "wa-dialog wa-text-input, wa-dialog .dict-tget, .tmodaldialog .tget",
+            "others": ("wa-tgrid, .dict-tgetdados, .dict-tcbrowse, .dict-tgrid, "
+                       ".dict-twbrowse, .dict-tsbrowse, .dict-msbrgetdbase, "
+                       ".dict-brgetddb, .dict-msselbr"),
         }
 
         logger().info("Ensuring the routine screen finished loading...")
@@ -6137,16 +6161,14 @@ class PouiInternal(Base):
             # Small delay so a late po-loading has time to appear on top of the
             # screen before we check for it, avoiding a false "ready" result.
             time.sleep(0.5)
-
-            loading = self.element_exists(term='po-loading',
-                                          scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                          main_container='body',
-                                          check_error=False)
+            
+            if loaded_screen == 'new_browser':
+                self._po_loading(timeout_appear=5)
 
             # Ready only when an expected screen is rendered and nothing is
             # loading on top of it. While po-loading is present (even if it shows
             # up late) we keep waiting for the transition to finish.
-            if loaded_screen and not loading:
+            if loaded_screen:
                 break
 
             loaded_screen = None
@@ -6158,6 +6180,8 @@ class PouiInternal(Base):
             logger().warning("None of the expected screens (browse, wizard, "
                              "parameters) finished loading within the timeout of "
                              f"{timeout}s.")
+
+        return loaded_screen
 
     def set_program(self, program_name: str = "", program_desc: str = "", module: str = ""):
         
@@ -6178,7 +6202,8 @@ class PouiInternal(Base):
         match_mode = 1 if module or program_desc else 3     
         ele_hidden = None
         wtb_after = None    
-        parameter_routine = 'CFGX017'
+        parameter_routine = 'CFGX017'  
+        loaded_screen = None      
 
         self.wait_element(term=search_term, scrap_type=enum.ScrapType.CSS_SELECTOR, main_container='body')
         
@@ -6192,38 +6217,56 @@ class PouiInternal(Base):
                                                 main_container='body')), None)
         
         self.input_value(self.language.input_set_program, program_name or program_desc, 1, exec_enter_tab=False)
-        self._po_loading()
+        self._po_loading(timeout_appear=5)
 
         if not program_name and program_desc:
             self.config.routine = self._get_program_by_desc(program_desc)
+
+        user_and_program = (
+            self.config.user.strip(),
+            (program_name or self.config.routine or "").strip().upper()
+        )
         
-        logger().debug(f'Selecting the routine')
+        logger().debug(f'Selecting the routine...')
 
         self.click_po_list_box(value=program_desc, second_value=program_name, 
                                 program_call=True, match_mode=match_mode)
+
+        logger().debug(f'Routine selected!')
         
-        if program_name != parameter_routine:
+        # Module selection is performed only when the initial program is SIGAADV or SIGAMDI.
+        # Once a user has made a selection, it does not need to be selected again for that same user.
+        if (user_and_program not in self.selected_routines_module) and \
+           ((self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']):
             self._select_routine_module(module)
+            self.selected_routines_module.append(user_and_program)
 
         self._confirm_environment_modal(timeout=120 if program_name != parameter_routine else 5)
 
         self.wait_element_is_not_displayed(hide_element, timeout=60)
+        if (self.config.initial_program or '').lower().strip() == 'sigamdi':
+            time.sleep(1)
+            self.wait_element_is_not_displayed(hide_element, timeout=60)
         ele_hidden = not self.element_is_displayed(hide_element)
-        logger().debug(f'New home disappeared.')
+        logger().debug(f'New home disappeared!') if ele_hidden else logger().debug(f'New home did not disappear!')
 
-        endtime = time.time() + self.config.time_out
+        logger().debug(f'Waiting for a new tab to open...')
+        endtime = time.time() + self.config.time_out        
         while time.time() < endtime:
-            logger().debug(f'Waiting for a new tab to open.')
 
             wtb_after = get_wtb()
             if wtb_before != wtb_after:
                 break
             time.sleep(1)
 
+        logger().debug(f'New tab opened!') if wtb_before != wtb_after else logger().debug(f'New tab did not open!')
+
         success = (ele_hidden) and (wtb_before != wtb_after)
 
         if program_name != parameter_routine:
+            logger().debug(f'Closing modals after accessing the routine...') 
             self.close_after_routine(program_name)
+            logger().debug(f'Modals closed!') 
 
         if not success:
             message = "Couldn't set the program."
@@ -6233,12 +6276,13 @@ class PouiInternal(Base):
             message = 'setUpClass - ' + message if self.log.get_testcase_stack() == 'setUpClass' else message
             self.assertTrue(False, message)
         
-        self.ensure_load_after_program()
+        loaded_screen = self._ensure_load_after_program()
 
-        if not program_name in self.closed_user_guide_routines:
+        if (user_and_program not in self.closed_user_guide_routines) and \
+           (loaded_screen == 'new_browser'):
             closed_user_guide = self._close_user_guide()
             if closed_user_guide:
-                self.closed_user_guide_routines.append(program_name)
+                self.closed_user_guide_routines.append(user_and_program)
 
     def _confirm_environment_modal(self, timeout: int = 120) -> bool:
         """
@@ -6263,9 +6307,7 @@ class PouiInternal(Base):
         """
 
         initial_program = (self.config.initial_program or '').strip().upper()
-        if initial_program not in ('SIGAADV', 'SIGAMDI'):
-            logger().debug(f"Initial program '{initial_program}' is not SIGAADV/SIGAMDI. "
-                           f"Skipping environment confirmation modal wait.")
+        if (self.config.initial_program or '').lower().strip() not in ['sigaadv', 'sigamdi']:
             return False
 
         dialog_term = 'wa-dialog'
@@ -6322,13 +6364,21 @@ class PouiInternal(Base):
         :return: None
         """
 
-        logger().info(f'Waiting for change module modal')
+        logger().info(f'Waiting for change module modal...')
+        
+        modal_found = False
 
-        endtime = time.time() + 30
+        endtime = time.time() + (self.config.time_out / 10)
         while time.time() < endtime:
 
-            if self.language.change_module in self.get_current_container().text:
-                logger().info(f'Changing module. Module: {module}')
+            container = self.get_current_container()
+
+            if not container:
+                time.sleep(1)
+                continue
+
+            if self.language.change_module in container.text:
+                logger().info(f'Change module modal found!')
 
                 if not module:
                     po_select = self.get_container_elements("po-select")
@@ -6344,14 +6394,22 @@ class PouiInternal(Base):
 
                 else:
                     value = module
+
+                logger().info(f'Selecting module {module}...')
                 
                 self.click_select(self.language.module, value, 1)
                 self.click_button(self.language.confirm)
+
+                modal_found = True
+
+                logger().info(f'Module selected!')
 
                 break
             
             time.sleep(1)
 
+        if not modal_found:
+            logger().info(f'Change module modal not found! Continuing execution...')
 
     def close_warning_screen_after_routine(self):
         from tir.technologies.core.events import emit
@@ -6370,9 +6428,9 @@ class PouiInternal(Base):
         emit('webapp.close_modal')
 
     def close_after_routine(self, program_name):
-        # Should close all 3 only for SIGAADV, but on new home they appear regardless of initial program
+        # Should close all 3 only for SIGAADV and SIGAMDI, but on new home they appear regardless of initial program
         self.close_warning_screen_after_routine()
-        if self.config.initial_program.lower() == 'sigaadv':
+        if (self.config.initial_program or '').lower().strip() in ['sigaadv', 'sigamdi']:
             self.close_coin_screen_after_routine()
             self.close_news_screen_after_routine()
 
@@ -6750,6 +6808,9 @@ class PouiInternal(Base):
 
         log_message = "Closing user guide..." if not success else "User guide not found!"
         logger().info(log_message)
+
+        if success:
+            return success
         
         while time.time() < endtime and not success:
 
@@ -6905,23 +6966,100 @@ class PouiInternal(Base):
         :param value: Value to search and select in the lookup.
         :type value: str
         :return: None
-        """
-        self._fill_input(input_element, value, field)
-        self._po_loading()
-        self._click_lookup_item(value)
 
-    def _click_lookup_item(self, value):
-        thf_item_list = self._get_lookup_list_item(value=value.strip().lower())
+        The whole process (fill -> wait loading -> select item) is retried until
+        ``config.time_out``. Each attempt has a slice of ``time_out / 3`` (at least 3 attempts),
+        and the inner steps run without ``log_error`` so a single failure doesn't end the test.
+        """
+        loading_appear_timeout = 5
+        list_timeout = 10
+
+        total_timeout = self.config.time_out
+        endtime = time.time() + total_timeout
+        attempt_budget = total_timeout / 3
+        attempt = 0
+        filled = False
+        success = False
+
+        while not success and time.time() < endtime:
+            attempt += 1
+            attempt_end = min(time.time() + attempt_budget, endtime)
+            logger().info(f"Filling lookup '{field}' with '{value}'. Attempt {attempt}.")
+
+            if attempt > 1:
+                self._erase_input_with_backspace(input_element)
+
+            fill_timeout = max(attempt_end - time.time() - loading_appear_timeout - list_timeout, 1)
+            filled = self._fill_input(input_element, value, field, timeout=fill_timeout, check_error=False)
+            if not filled:
+                logger().debug(f"Lookup '{field}' couldn't be filled on attempt {attempt}.")
+                continue
+
+            self._po_loading(timeout_appear=min(loading_appear_timeout, max(endtime - time.time(), 1)))
+
+            item_timeout = min(list_timeout, max(attempt_end - time.time(), 1))
+            success = self._click_lookup_item(value, timeout=item_timeout, check_error=False)
+            if not success:
+                logger().debug(f"Lookup item '{value}' not selected on attempt {attempt}.")
+
+        if not success:
+            if not filled:
+                self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
+            else:
+                self.log_error(f"Lookup item '{value}' not found in suggestion list.")
+
+    def _erase_input_with_backspace(self, input_element) -> None:
+        """
+        [Internal]
+
+        Erases the content of an input by selecting everything (CTRL+A) and pressing BACKSPACE once.
+        Used before refilling a field, so the field emits the same events as a user deleting the text.
+
+        :param input_element: BeautifulSoup input element.
+        :type input_element: bs4.element.Tag
+        :return: None
+        """
+        try:
+            self.switch_to_iframe()
+            input_field_element = lambda: self.soup_to_selenium(input_element)
+
+            self.scroll_to_element(input_field_element())
+            self.set_element_focus(input_field_element())
+            self.click(input_field_element())
+
+            ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
+        except Exception as e:
+            logger().debug(f"Error erasing input with backspace: {e}")
+
+    def _click_lookup_item(self, value, timeout: int = 10, check_error: bool = True) -> bool:
+        """
+        [Internal]
+
+        Clicks on the lookup list item that matches the value.
+
+        :param value: Text to search in the suggestion list.
+        :type value: str
+        :param timeout: Seconds to wait for the suggestion list. - **Default:** 10
+        :type timeout: int
+        :param check_error: If True, calls log_error when the item isn't found. - **Default:** True
+        :type check_error: bool
+        :return: True if the item was found and clicked, otherwise False.
+        :rtype: bool
+        """
+        thf_item_list = self._get_lookup_list_item(value=value.strip().lower(), timeout=timeout)
 
         if thf_item_list:
             item_div = thf_item_list.find_next('div')
-            self.click(self.soup_to_selenium(item_div))
+            return bool(self.click(self.soup_to_selenium(item_div)))
             # ActionChains(self.driver).key_down(Keys.TAB).perform()
-        else:
+
+        if check_error:
             self.log_error(f"Lookup item '{value}' not found in suggestion list.")
 
+        return False
 
-    def _fill_input(self, input_element, value: str, field: str = '') -> None:
+
+    def _fill_input(self, input_element, value: str, field: str = '', timeout=None, check_error: bool = True) -> bool:
         """
         [Internal]
 
@@ -6931,11 +7069,16 @@ class PouiInternal(Base):
         :type input_element: bs4.element.Tag
         :param value: Value to type into the input.
         :type value: str
-        :return: None
+        :param timeout: Seconds to keep trying. If None, uses config.time_out. - **Default:** None
+        :type timeout: float
+        :param check_error: If True, calls log_error when the field can't be filled. - **Default:** True
+        :type check_error: bool
+        :return: True if the field holds the value, otherwise False.
+        :rtype: bool
         """
         success = False
 
-        endtime = time.time() + self.config.time_out
+        endtime = time.time() + (self.config.time_out if timeout is None else timeout)
         while time.time() < endtime and not success:
             try:
                 self.switch_to_iframe()
@@ -6961,7 +7104,7 @@ class PouiInternal(Base):
                 logger().debug(f"Error filling input field: {e}")
                 success = False
 
-        if not success:
+        if not success and check_error:
             self.log_error(f"Couldn't set filter field '{field}' with value '{value}'.")
 
         return success
@@ -7198,7 +7341,7 @@ class PouiInternal(Base):
             logger().debug(f"_scroll_field_into_view: couldn't scroll element into view - {str(e)}")
 
 
-    def _get_lookup_list_item(self, value: str):
+    def _get_lookup_list_item(self, value: str, timeout: int = 10):
         """
         [Internal]
 
@@ -7206,6 +7349,8 @@ class PouiInternal(Base):
 
         :param value: The text value to search for in the list items.
         :type value: str
+        :param timeout: Seconds to wait for the thf-lookup-list. - **Default:** 10
+        :type timeout: int
         :return: The matching BeautifulSoup <li> element or None if not found.
         :rtype: bs4.element.Tag or None
         """
@@ -7213,7 +7358,7 @@ class PouiInternal(Base):
         term = 'thf-lookup-list'
 
         self.wait_element_timeout(term=term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                  timeout=10, twebview=True)
+                                  timeout=timeout, twebview=True)
 
         lookup_list = self.get_container_elements(term, select_all=False, filter_displayeds=True)
 
