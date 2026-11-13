@@ -4,6 +4,7 @@ Enumerations
     :members:
     :undoc-members:
     :show-inheritance:
+    :no-index:
 
 .. autoclass:: tir.technologies.core.enumerations.MessageType
     :members:

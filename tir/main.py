@@ -1331,6 +1331,7 @@ class Webapp():
         """
 
         :return: connection object
+
         Usage:
 
         >>> # Call the method:
@@ -1342,7 +1343,8 @@ class Webapp():
         """
 
         :param connection: connection object
-        :type param: object
+        :type connection: object
+
         Usage:
 
         >>> # Call the method:
@@ -1932,11 +1934,14 @@ class Poui():
 
         :param content: Content to be Search.
         :type content: str
+        :param placeholder: Placeholder of the search input, used to select it when there is more than one.
+        :type placeholder: str
+        :return: None
+
         Usage:
 
         >>> # Call the method:
         >>> oHelper.POSearch(content='Content to be Search')
-        :return: None
         """
         self.__poui.POSearch(content, placeholder)
 
@@ -1974,7 +1979,7 @@ class Poui():
             :param itens: [DEPRECATED] Click all items matching criteria - **Default:** False
             :type itens: bool
             :param click_cell: Column name where the click action should occur.
-            If you need to select rows consider to use checkbox or radio_input parameters - **Default:** None
+                If you need to select rows consider to use checkbox or radio_input parameters - **Default:** None
             :type click_cell: str
             :param checkbox: If True/False, toggles checkbox to that state - **Default:** None
             :type checkbox: bool
@@ -1987,7 +1992,7 @@ class Poui():
             :param match_all: If True, performs action on all matching rows. If False, only first match - **Default:** False
             :type match_all: bool
             :param icon_class: Icon class name to click within the row. Supports partial class name
-            matching (e.g., 'arrow-up-right', 'ph-arrow-up-right', 'an-arrow-up-right') - **Default:** None
+                matching (e.g., 'arrow-up-right', 'ph-arrow-up-right', 'an-arrow-up-right') - **Default:** None
             :type icon_class: str
 
             Usage:
@@ -2315,11 +2320,13 @@ class Poui():
         https://po-ui.io/documentation/po-lookup
 
         :param label: field from lookup input
-        :type: str
+        :type label: str
         :param search_value: Value to input in search field
-        :type: str
-        :return:
+        :type search_value: str
+        :return: None
+
         Usage:
+
         >>> # Call the method:
         >>> oHelper.ClickLookUp("Base de Atendimento", "006TE - PLS_08")
         >>> oHelper.ClickLookUp("Base de Atendimento")
@@ -2335,26 +2342,30 @@ class Poui():
         visible link text and/or the element's `href` attribute. When multiple elements match, the
         `position` parameter selects which occurrence to click (1-based).
 
-        Parameters
+        **Parameters**
+
         :param text: Visible text of the link to click. If empty, text matching is ignored.
         :type text: str
         :param href: Destination URL (`href` attribute) to match. Can be a relative or absolute URL.
         :type href: str
         :param position: 1-based index of the occurrence to click when several elements match - Default: 1
         :type position: int
-        :param contains:    If False (default) the method requires an exact match of `text` or `href`;
-                            If True the method accepts a substring match.
+        :param contains: If False (default) the method requires an exact match of `text` or `href`;
+            If True the method accepts a substring match.
         :type contains: bool
 
-        Behavior
+        **Behavior**
+
         - If only `text` is provided, matching is performed on the element's visible text.
         - If only `href` is provided, matching is performed solely on the `href` attribute.
         - If both `text` and `href` are provided, the method filters first by visible text, then by the destination URL (`href`).
 
-        Returns
+        **Returns**
+
         :return: None
 
-        Examples
+        **Examples**
+
         >>> # Click by visible text
         >>> oHelper.ClickLink('PO Link')
 

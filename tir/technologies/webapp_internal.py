@@ -3749,9 +3749,9 @@ class WebappInternal(Base):
         :param name_attr: Boolean if search by Name attribute must be forced. - **Default:** False
         :type name_attr: bool
         :param input_field: False if the desired field is not an input type
-        :type bool
+        :type input_field: bool
         :param direction: Desired direction to search for the element, currently accepts right and down
-        :type str
+        :type direction: str
         :param grid_memo_field: Boolean if this is a memo grid field. - **Default:** False
         :type grid_memo_field: bool
 
@@ -12477,7 +12477,7 @@ class WebappInternal(Base):
         [Internal]
         Captures the innerHTML content of shadow roots from specific elements (wa-tab-page).
         Returns a list of innerHTML strings for comparison.
-        Cleans special characters like \n, \t, \r and multiple spaces in Python.
+        Cleans special characters (line breaks, tabs, carriage returns) and multiple spaces in Python.
         """
         try:
             shadow_contents = []
@@ -12604,12 +12604,13 @@ class WebappInternal(Base):
 
         :param base_file: Base file that reflects the expected. If doesn't exist make a copy of auto and then rename to base
         :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        :return: None
+
         >>> # File example:
         >>> # acda080rbase.##r
         >>> # acda080rauto.##r
         >>> # Calling the method:
         >>> self.oHelper.ReportComparison(base_file="acda080rbase.##r", current_file="acda080rauto.##r")
-        :return:
         """
 
         message = ""
@@ -12678,13 +12679,13 @@ class WebappInternal(Base):
 
         if not file_extension == '.xml':
 
-            emissao = re.search(r'('+self.language.issued+': )(?:(\d{2}-\d{2}-\d{4}))', line)
+            emissao = re.search(r'('+self.language.issued+r': )(?:(\d{2}-\d{2}-\d{4}))', line)
 
-            dtref = re.search(r'('+self.language.ref_dt+': )(?:(\d{2}-\d{2}-\d{4}))', line)
+            dtref = re.search(r'('+self.language.ref_dt+r': )(?:(\d{2}-\d{2}-\d{4}))', line)
 
-            hora = re.search(r'('+self.language.time+'\.\.\.: )(?:(\d{2}:\d{2}:\d{2}))', line)
+            hora = re.search(r'('+self.language.time+r'\.\.\.: )(?:(\d{2}:\d{2}:\d{2}))', line)
 
-            hora_termino = re.search(r'('+self.language.end_time+': )(?:(\d{2}:\d{2}:\d{2}))', line)
+            hora_termino = re.search(r'('+self.language.end_time+r': )(?:(\d{2}:\d{2}:\d{2}))', line)
 
             slash = re.search(r'(/)', line)
 
