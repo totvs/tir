@@ -3643,12 +3643,13 @@ class PouiInternal(Base):
 
         :param base_file: Base file that reflects the expected. If doesn't exist make a copy of auto and then rename to base
         :param current_file: Current file recently impressed, this file is use to generate file_auto automatically.
+        :return: None
+
         >>> # File example:
         >>> # acda080rbase.##r
         >>> # acda080rauto.##r
         >>> # Calling the method:
         >>> self.oHelper.ReportComparison(base_file="acda080rbase.##r", current_file="acda080rauto.##r")
-        :return:
         """
 
         message = ""
@@ -4379,11 +4380,14 @@ class PouiInternal(Base):
 
         :param content: Content to be Search.
         :type content: str
+        :param placeholder: Placeholder of the search input, used to select it when there is more than one.
+        :type placeholder: str
+        :return: None
+
         Usage:
 
         >>> # Call the method:
         >>> oHelper.POSearch(content='Content to be Search')
-        :return: None
         """
         element = None
 
@@ -5336,19 +5340,19 @@ class PouiInternal(Base):
         '''Select a value for list combo inputs.
 
         :param field: label of field
-        :type : str
+        :type field: str
         :param value: value to input on field
-        :type : str
+        :type value: str
         :param position: position passed to the label lookup. - **Default:** 1
-        :type : int
+        :type position: int
         :param second_value: value below the principal value (after the ":"). Not every combo has it. When it is
             informed without ``value``, the selection is not validated, because the field receives the principal
             value of the item, which is unknown in that case.
-        :type : str
+        :type second_value: str
         :param match_case: If True, requires exact normalized match; if False, allows partial normalized match.
             The same rule is used to select the item and to check the value shown in the field after the selection.
-        :type : bool
-        :return:
+        :type match_case: bool
+        :return: None
         '''
 
         success = None
@@ -5387,12 +5391,14 @@ class PouiInternal(Base):
     def click_po_list_box(self, value="", second_value="", program_call=False, match_mode=1) -> None:
         '''
         :param value: Value to select on po-list-box
-        :type str
+        :type value: str
         :param second_value: value below the principal value (after the ":")
-        :type : str
+        :type second_value: str
+        :param program_call: If True, clears the routine attributes of the config when the item is not found
+        :type program_call: bool
         :param match_mode: Matching strategy used to find the item. 1 = exact match, 2 = contains, 3 = program code match.
-        :type : int
-        :return:
+        :type match_mode: int
+        :return: None
         '''
         orig_value = value
         orig_second_value = second_value

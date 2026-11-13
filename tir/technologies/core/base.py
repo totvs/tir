@@ -615,9 +615,9 @@ class Base(unittest.TestCase):
     def filter_active_iframe(self, iframes):
         '''
 
-        :param iframes:
-        :type List
-        :return:
+        :param iframes: List of iframe elements to be filtered.
+        :type iframes: list
+        :return: The displayed iframe with the highest z-index.
         '''
         iframes_displayed = []
 
@@ -1039,6 +1039,7 @@ class Base(unittest.TestCase):
         :type element: Selenium object
         :param arg: Text or Keys to be sent to the element
         :type arg: str or selenium.webdriver.common.keys
+
         Usage:
 
         >>> #Defining the element:
