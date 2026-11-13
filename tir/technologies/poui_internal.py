@@ -2225,7 +2225,7 @@ class PouiInternal(Base):
                 else:
                     return list(filter(lambda x: term.lower() in x.text.lower(), container.select("div > *")))
             elif (scrap_type == enum.ScrapType.CSS_SELECTOR):
-                return container.select(term)
+                return list(filter(lambda x: self.element_is_displayed(x, twebview=twebview), container.select(term)))
             elif (scrap_type == enum.ScrapType.MIXED and optional_term is not None):
                 if not twebview:
                     return self.filter_label_element(term, container, twebview=twebview, label_selector=optional_term, position=position)
@@ -5339,11 +5339,14 @@ class PouiInternal(Base):
         :type : str
         :param value: value to input on field
         :type : str
-        :param position:
+        :param position: position passed to the label lookup. - **Default:** 1
         :type : int
-        :param second_value: value below the principal value (after the ":")
+        :param second_value: value below the principal value (after the ":"). Not every combo has it. When it is
+            informed without ``value``, the selection is not validated, because the field receives the principal
+            value of the item, which is unknown in that case.
         :type : str
         :param match_case: If True, requires exact normalized match; if False, allows partial normalized match.
+            The same rule is used to select the item and to check the value shown in the field after the selection.
         :type : bool
         :return:
         '''
@@ -5351,7 +5354,6 @@ class PouiInternal(Base):
         success = None
         position -= 1
         current_value = None
-        main_value = ''
 
         logger().info(f"Clicking on {field}")
         self.wait_element(term='po-combo')
@@ -5362,19 +5364,22 @@ class PouiInternal(Base):
                                             position=position, main_container='body')
             po_combo_displayeds = list(filter(lambda x: self.element_is_displayed(x), po_combo_list))
             if po_combo_displayeds:
-                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x),
+                po_combo_filtred = next(iter(filter(lambda x: self.filter_label_element(field.strip(), x, position + 1),
                                                     po_combo_displayeds)),None)
                 po_input = po_combo_filtred.find_next('input')
                 if po_input:
                     po_input_sel = self.soup_to_selenium(po_input, twebview=True)
                     match_mode = 1 if match_case else 2
 
-                    main_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
                     self.open_input_combo(po_combo_filtred)
                     self.send_keys(po_input_sel, value if value else second_value)
                     self.click_po_list_box(value, second_value, match_mode=match_mode)
                     current_value = self.get_web_value(self.soup_to_selenium(po_input, twebview=True))
-                    success = current_value.strip().lower() == main_value.strip().lower() if value else True
+                    # The input must show the requested option, compared with the same match mode used to select it.
+                    # second_value alone is not validated because the input receives the principal value, which is unknown then.
+                    success = self._match_po_item_value(value, current_value, match_mode) if value else True
+                    if not success:
+                        logger().debug(f"ClickCombo: field '{field}' shows '{current_value}', expected '{value}' (match mode {match_mode}).")
 
         if not success:
             self.log_error(f'Click on {value} of {field} Fail. Please Check')
