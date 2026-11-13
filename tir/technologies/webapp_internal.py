@@ -447,7 +447,7 @@ class WebappInternal(Base):
         while time.time() < endtime and not program_screen:
             start_program_term = '#selectStartProg'
             program_screen = self.web_scrap(term=start_program_term, scrap_type=enum.ScrapType.CSS_SELECTOR,
-                                    main_container=self.containers_selectors["AllContainers"],
+                                    main_container='body',
                                     check_help=False, check_error=False)
 
 
