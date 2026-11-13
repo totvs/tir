@@ -3298,7 +3298,12 @@ class PouiInternal(Base):
             element_selenium = element
 
         if element_selenium:
-            return element_selenium.is_displayed()
+            try:
+                return element_selenium.is_displayed()
+            except StaleElementReferenceException:
+                # Transient elements (e.g. po-loading) can leave the DOM between the lookup and the check.
+                logger().debug("element_is_displayed: element is stale, considering it not displayed.")
+                return False
         else:
             return False
 
