@@ -1106,18 +1106,24 @@ class WebappInternal(Base):
         [Internal]
 
         Fills the branch field on the environment screen with the value configured in config.json.
-        Retries until the value matches or the timeout is reached.
+        Retries until the value matches or the timeout is reached. When the branch field is not
+        found, it keeps looking until the timeout (config.time_out / 2) and then returns without
+        filling it, without raising an exception and without calling log_error.
 
         :param shadow_root: Indicates whether to use shadow root selectors. - **Default:** None
         :type shadow_root: bool
         :param container: CSS selector of the container element. - **Default:** None
         :type container: str
+        :return: None. The method returns after the branch is filled or the timeout is reached.
+        :rtype: None
         """
 
         click_type = 1
         branch_value = ''
         endtime = time.time() + self.config.time_out / 2
         while (time.time() < endtime and (branch_value.strip() != self.config.branch.strip())):
+            # Reset on every pass so an element found in a previous pass is never reused.
+            branch_element = None
 
             if self.config.poui_login:
                 branch_elements = self.web_scrap(term=self.language.branch, main_container='body',
@@ -1125,8 +1131,8 @@ class WebappInternal(Base):
 
                 if branch_elements:
                     branch_element = next(iter(branch_elements))
-                    branch_element = branch_element.find_parent('pro-branch-lookup')
-                    branch_element = next(iter(branch_element.select('input')), None)
+                    branch_parent = branch_element.find_parent('pro-branch-lookup')
+                    branch_element = next(iter(branch_parent.select('input')), None) if branch_parent is not None else None
             else:
                 if self.webapp_shadowroot(shadow_root=shadow_root):
                     branch_elements = self.web_scrap(term="[name='cFil'], [name='__cFil']",
@@ -1165,6 +1171,8 @@ class WebappInternal(Base):
                 click_type += 1
                 if click_type > 3:
                     click_type = 1
+            else:
+                time.sleep(1)
 
     def filling_environment(self, shadow_root=None, container=None):
         """
