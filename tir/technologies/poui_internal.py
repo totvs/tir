@@ -6273,6 +6273,10 @@ class PouiInternal(Base):
             wtb_after = get_wtb()
             if wtb_before != wtb_after:
                 break
+
+            # Some routines open the news screen before their tab is created,
+            # which blocks the tab from appearing until the screen is closed.
+            self.close_news_screen(check_error=False)
             time.sleep(1)
 
         logger().debug(f'New tab opened!') if wtb_before != wtb_after else logger().debug(f'New tab did not open!')
@@ -6471,6 +6475,10 @@ class PouiInternal(Base):
     def close_screen_before_menu(self):
         from tir.technologies.core.events import emit
         emit('webapp.close_screen_before_menu')
+
+    def close_news_screen(self, check_error=True):
+        from tir.technologies.core.events import emit
+        emit('webapp.close_news_screen', check_error=check_error)
 
     def Setup(self, initial_program, date='', group='99', branch='01', module='', save_input=True):
         from tir.technologies.core.events import emit
