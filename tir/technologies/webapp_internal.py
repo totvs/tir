@@ -1653,11 +1653,14 @@ class WebappInternal(Base):
             optional_term=title_term, main_container="body", check_error = False, check_help = False)
 
 
-    def close_news_screen(self):
+    def close_news_screen(self, check_error=True):
         """
         [Internal]
 
         Closes the news do programa screen.
+
+        :param check_error: If False, a failure to click the close button does not fail the test. - **Default:** True
+        :type check_error: bool
 
         Usage:
 
@@ -1672,7 +1675,8 @@ class WebappInternal(Base):
         soup = self.get_current_DOM()
         modals = self.zindex_sort(soup.select(".tmodaldialog, wa-dialog"), True)
         if modals and self.check_news_screen():
-            self.SetButton(self.language.close)
+            logger().info('News screen found, clicking on close button...')
+            self.SetButton(self.language.close, check_error=check_error)
 
     def close_news_screen_after_routine(self):
         """
